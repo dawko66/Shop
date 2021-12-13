@@ -46,7 +46,7 @@ namespace VODUser.Controllers
                 if (result.Succeeded)
                 {
                     await _signInManager.SignInAsync(user, false);
-                    return RedirectToAction("Index", "Home");
+                    return RedirectToAction("CheckLogin", "Account");
                 }
                 foreach (var err in result.Errors) { ModelState.AddModelError(string.Empty, err.Description); }
             }
@@ -64,18 +64,18 @@ namespace VODUser.Controllers
         {
             if (ModelState.IsValid)
             {
-                User user = new  User
+/*                User user = new User
                 {
                     Email = loginViewModel.Email,
                     UserName = loginViewModel.Email
-                };
-
+                };*/
+                var user = await _userManager.FindByNameAsync(loginViewModel.Email);
 
                 Microsoft.AspNetCore.Identity.SignInResult identityResult = await _signInManager.PasswordSignInAsync(user, loginViewModel.Password, false, false);
                 
                 if (identityResult.Succeeded)
                 {
-                    return RedirectToAction("Index", "Home");
+                    return RedirectToAction("CheckLogin", "Account");
                 }
                 else
                 {
@@ -85,12 +85,19 @@ namespace VODUser.Controllers
             return View();
         }
 
+        [HttpGet]
+        public async Task<IActionResult> LogOff()
+        {
+            await _signInManager.SignOutAsync();
+            return RedirectToAction("Login", "Account");
+        }
+
 
         [HttpGet]
         [Authorize]
         public IActionResult CheckLogin()
         {
-            return Ok();
+            return View();
         }
     }
 }
